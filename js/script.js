@@ -16,6 +16,8 @@ otherJobRoleField.style.display = "none";
 jobRole.addEventListener("change", function () {
   if (jobRole.value == "other") {
     otherJobRoleField.style.display = "block";
+  } else {
+    otherJobRoleField.style.display = "none";
   }
 });
 
@@ -28,13 +30,18 @@ const shirtColorOptions = document.querySelectorAll("#color option");
 // slice that array into the two categories
 const jsPuns = Array.from(shirtColorOptions).slice(1, 4);
 const heartJS = Array.from(shirtColorOptions).slice(4);
-
+// reset if the shirt design is changed after a color is selected
+const newColorSelection = document.createElement('option');
+newColorSelection.textContent = 'Please select again...';
+newColorSelection.setAttribute('value', 'reselect');
+newColorSelection.setAttribute('hidden', '');
+shirtColors.insertBefore(newColorSelection, shirtColors.children[1]);
 // disable use of the shirt color dropdown until a design is chosen by the user
-shirtColors.style.pointerEvents = "none";
+shirtColors.disabled = true;
 // DISCLAIMER: this is a terrible way to do this and in production please just add a class to the HTML
 // add event listener to the shirt design element
 shirtDesigns.addEventListener("change", function () {
-  shirtColors.style.pointerEvents = "auto";
+  shirtColors.disabled = false;
   // loop through and display the corresponding colors based on which design was chosen
   if (shirtDesigns.value == "js puns") {
     jsPuns.forEach(function (option) {
@@ -51,6 +58,11 @@ shirtDesigns.addEventListener("change", function () {
       option.style.display = "block";
     });
   }
+
+  if (shirtColors.value !== "") {
+    shirtColors.value = "reselect";
+  }
+
 });
 
 // Activities section
@@ -95,16 +107,16 @@ paymentSelections[0].setAttribute("value", "method");
 paymentSelections[1].setAttribute("selected", "");
 
 paymentSelect.addEventListener("change", function (event) {
-  const paymentMethod = event.target.value;
-  if (paymentMethod === "credit-card") {
+  const paymentType = event.target.value;
+  if (paymentType === "credit-card") {
     creditCard.style.display = "block";
     paypal.style.display = "none";
     bitcoin.style.display = "none";
-  } else if (paymentMethod === "paypal") {
+  } else if (paymentType === "paypal") {
     paypal.style.display = "block";
     creditCard.style.display = "none";
     bitcoin.style.display = "none";
-  } else if (paymentMethod === "bitcoin") {
+  } else if (paymentType === "bitcoin") {
     bitcoin.style.display = "block";
     creditCard.style.display = "none";
     paypal.style.display = "none";
@@ -119,6 +131,7 @@ const cardNumberField = document.getElementById("cc-num");
 const zipCodeField = document.getElementById("zip");
 const cvvField = document.getElementById("cvv");
 const form = document.querySelector("form");
+const paymentMethod = paymentSelect.value;
 
 // add event listener to the form for submit event
 form.addEventListener("submit", function (event) {
@@ -138,21 +151,18 @@ form.addEventListener("submit", function (event) {
   // email validation section
   const emailValue = emailField.value;
   const emailValidation = /^[^\s@]+@[^\s@]+\.[^\s@]+$/g.test(emailValue);
-  console.log("Email:", emailValue);
-  console.log("Email validation:", emailValidation);
   if (!emailValidation) {
     event.preventDefault();
   }
 
   // activities validation section
   const activitiesValidation = totalCost > 0;
-  console.log("Activities validation:", activitiesValidation);
   if (!activitiesValidation) {
     event.preventDefault();
   }
 
   // CC validation section
-  const paymentMethod = paymentSelect.value;
+  
   if (paymentMethod === "credit-card") {
     const cardNumberValue = cardNumberField.value;
     const zipCodeValue = zipCodeField.value;
@@ -200,13 +210,25 @@ function removeValidationError(element) {
   element.parentElement.lastElementChild.style.display = "none";
 }
 
+// add validation error indications for Activities Field
+function addValidationErrorActivities(element) {
+  activitiesField.firstElementChild.classList.add("not-valid");
+  activitiesField.firstElementChild.classList.remove("valid");
+  activitiesField.querySelector('.activities-hint').style.display = "block";
+}
+
+// remove validation error indications for Activities Field
+function removeValidationErrorActivities(element) {
+  activitiesField.firstElementChild.classList.add("valid");
+  activitiesField.firstElementChild.classList.remove("not-valid");
+  activitiesField.querySelector('.activities-hint').style.display = "none";
+}
+
 // addEventListener for form submission
 form.addEventListener("submit", function (event) {
   // validate name field
   const nameValue = nameField.value;
-  const nameValidation = /^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$/g.test(
-    nameValue
-  );
+  const nameValidation = /^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$/g.test(nameValue);
   if (!nameValidation) {
     addValidationError(nameField);
     event.preventDefault();
@@ -227,10 +249,10 @@ form.addEventListener("submit", function (event) {
   // validate activities selection
   const activitiesValidation = totalCost > 0;
   if (!activitiesValidation) {
-    addValidationError(activitiesField);
+    addValidationErrorActivities(activitiesField);
     event.preventDefault();
   } else {
-    removeValidationError(activitiesField);
+    removeValidationErrorActivities(activitiesField);
   }
 
   // validate credit card fields
