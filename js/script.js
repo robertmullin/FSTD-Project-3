@@ -159,9 +159,10 @@ form.addEventListener("submit", function (event) {
     event.preventDefault();
   }
 
-  // CC validation section
-  
+  // Payment method validation section
+  const paymentMethod = paymentSelect.value;
   if (paymentMethod === "credit-card") {
+    // CC validation section
     const cardNumberValue = cardNumberField.value;
     const zipCodeValue = zipCodeField.value;
     const cvvValue = cvvField.value;
@@ -172,6 +173,11 @@ form.addEventListener("submit", function (event) {
 
     if (!cardNumberValidation || !zipCodeValidation || !cvvValidation) {
       event.preventDefault();
+    } else {
+      // If payment method is not credit-card, skip credit card validation
+      removeValidationError(cardNumberField);
+      removeValidationError(zipCodeField);
+      removeValidationError(cvvField);
     }
   }
 });
@@ -224,6 +230,8 @@ function removeValidationErrorActivities(element) {
 
 // addEventListener for form submission
 form.addEventListener("submit", function (event) {
+
+  const paymentMethod = paymentSelect.value;
   // validate name field
   const nameValue = nameField.value;
   const nameValidation = /^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$/g.test(nameValue);
@@ -253,35 +261,40 @@ form.addEventListener("submit", function (event) {
     removeValidationErrorActivities(activitiesField);
   }
 
-  // validate credit card fields
-  if (paymentMethod === "credit-card") {
-    const cardNumberValue = cardNumberField.value;
-    const cardNumberValidation = /^\d{13,16}$/g.test(cardNumberValue);
-    if (!cardNumberValidation) {
-      addValidationError(cardNumberField);
-      event.preventDefault();
-    } else {
-      removeValidationError(cardNumberField);
-    }
-
-    // validate zip code
-    const zipCodeValue = zipCodeField.value;
-    const zipCodeValidation = /^\d{5}$/g.test(zipCodeValue);
-    if (!zipCodeValidation) {
-      addValidationError(zipCodeField);
-      event.preventDefault();
-    } else {
-      removeValidationError(zipCodeField);
-    }
-
-    // validate CC CVV
-    const cvvValue = cvvField.value;
-    const cvvValidation = /^\d{3}$/g.test(cvvValue);
-    if (!cvvValidation) {
-      addValidationError(cvvField);
-      event.preventDefault();
-    } else {
-      removeValidationError(cvvField);
-    }
+ // validate credit card fields only if payment method is "credit-card"
+ if (paymentMethod === "credit-card") {
+  const cardNumberValue = cardNumberField.value;
+  const cardNumberValidation = /^\d{13,16}$/g.test(cardNumberValue);
+  if (!cardNumberValidation) {
+    addValidationError(cardNumberField);
+    event.preventDefault();
+  } else {
+    removeValidationError(cardNumberField);
   }
-});
+
+  // validate zip code
+  const zipCodeValue = zipCodeField.value;
+  const zipCodeValidation = /^\d{5}$/g.test(zipCodeValue);
+  if (!zipCodeValidation) {
+    addValidationError(zipCodeField);
+    event.preventDefault();
+  } else {
+    removeValidationError(zipCodeField);
+  }
+
+  // validate CC CVV
+  const cvvValue = cvvField.value;
+  const cvvValidation = /^\d{3}$/g.test(cvvValue);
+  if (!cvvValidation) {
+    addValidationError(cvvField);
+    event.preventDefault();
+  } else {
+    removeValidationError(cvvField);
+  }
+} else {
+  // If payment method is not credit-card, remove any previous validation errors for credit card fields
+  removeValidationError(cardNumberField);
+  removeValidationError(zipCodeField);
+  removeValidationError(cvvField);
+}
+}); 
