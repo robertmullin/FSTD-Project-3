@@ -1,4 +1,3 @@
-// window.onload = function () {};
 // variables selecting DOM elements in the form
 const nameField = document.getElementById("name");
 
@@ -38,7 +37,6 @@ newColorSelection.setAttribute('hidden', '');
 shirtColors.insertBefore(newColorSelection, shirtColors.children[1]);
 // disable use of the shirt color dropdown until a design is chosen by the user
 shirtColors.disabled = true;
-// DISCLAIMER: this is a terrible way to do this and in production please just add a class to the HTML
 // add event listener to the shirt design element
 shirtDesigns.addEventListener("change", function () {
   shirtColors.disabled = false;
